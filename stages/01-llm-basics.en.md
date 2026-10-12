@@ -544,8 +544,8 @@ At each step an LLM predicts a probability distribution for the next token, then
 
 - `Connection refused`: make sure `ollama serve` is running and the `base_url` port is 11434.
 - Model not found: run `ollama list`, then install with `ollama pull gemma4:e4b`; do not guess a tag.
-- Truncated response: shorten the prompt or lower `max_tokens`, and check the model's context window.
-- Ollama returns empty content or `finish_reason="length"`: `max_tokens` caps one generation. In the reported `gemma4:e4b` + Ollama 0.34.2 setup, thinking can use that budget; both Path A examples set `reasoning_effort="none"` and accept only `finish_reason="stop"` with nonblank `content`. This is evidenced only for that model/version; verify compatibility before changing either. This is a per-call output limit, not a paid API quota.
+- Truncated response: check `finish_reason` and the model's context window first. If `finish_reason="length"` and the answer is incomplete, modestly raise `max_tokens` or shorten the requested answer; if the prompt and conversation history exceed the context window, shorten the input.
+- Ollama returns empty content or `finish_reason="length"`: `max_tokens` caps one generation. In the reported setup (`gemma4:e4b` with Ollama 0.34.2), thinking may consume this budget; both Path A examples set `reasoning_effort="none"` and accept only `finish_reason="stop"` with nonblank `content`. This is evidenced only for that model/version; verify compatibility before changing either. This is a per-call output limit, not a paid API quota.
 - API failure: save the model, status code, and request id. Retry only temporary network/service errors; fix authentication and context errors first.
 - Cost mismatch: multiply input and output separately; cache hits, batches, and plans can change the actual price.
 
