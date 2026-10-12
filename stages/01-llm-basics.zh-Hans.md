@@ -545,7 +545,7 @@ LLM 每一步都会预测下一个 token 的概率分布，再按设置选出候
 - `Connection refused`：确认 `ollama serve` 正在运行，且 `base_url` 的端口是 11434。
 - 找不到模型：先运行 `ollama list`，再用 `ollama pull gemma4:e4b` 安装，不要猜 tag。
 - 响应被截断：缩短提示或降低 `max_tokens`，并检查型号的 context window。
-- Ollama 返回空白内容或 `finish_reason="length"`：`max_tokens` 限制单次生成；回报者的 `gemma4:e4b` + Ollama 0.34.2 环境中，thinking 会耗用这个上限。两个 Path A 示例设为 `reasoning_effort="none"`，并只接受 `finish_reason="stop"` 且非空白的 `content`；此设置仅有该模型／版本的证据，更换版本或模型前请先确认兼容性。这是单次输出上限，不是付费 API 额度。
+- Ollama 返回空白内容或 `finish_reason="length"`：`max_tokens` 限制单次生成；回报者的 `gemma4:e4b` + Ollama 0.34.2 环境中，thinking 可能会耗用这个上限。两个 Path A 示例设为 `reasoning_effort="none"`，并只接受 `finish_reason="stop"` 且非空白的 `content`；此设置仅有该模型／版本的证据，更换版本或模型前请先确认兼容性。这是单次输出上限，不是付费 API 额度。
 - API 失败：先保存型号、状态码和 request id；只重试临时网络／服务错误，先修复认证与 context 错误。
 - 成本对不上：输入和输出分别相乘；缓存命中、批处理和方案可能改变实际价格。
 
