@@ -495,3 +495,9 @@ and rate-only cross-model cost labels. No paid API calls or live quality claims.
 notices and existing runnable model defaults. Older Haiku 4.5 examples remain a
 compatibility baseline; a later migration needs framework, token-budget, signed
 thinking replay, append-only conversation, and refusal handling tests.
+
+### Stage 1 — Ollama Path A response guard (issue #314, 2026-10-12)
+
+`scripts/test_stage01_ollama_path.py` executes Exercises 1 and 2 from all three locale pages with a fake OpenAI-compatible client. It checks that each request sets `reasoning_effort="none"`, and that only `finish_reason="stop"` with nonblank content can pass before an output-token sample is recorded. Mocked `length`, empty, and whitespace-only responses must fail closed. The test makes no Ollama or paid API call and establishes no compatibility beyond the reported `gemma4:e4b` + Ollama 0.34.2 setup.
+
+The Stage 1 visible-character ceilings in `scripts/reader-ux-pages.yml` increase by the measured open-code deltas (zh-TW/en/zh-Hans: 212/169/208). The counter is a source-level reading proxy, not a rendered-page measurement.
