@@ -229,3 +229,26 @@ body[data-md-color-scheme="slate"] {
 .md-typeset table:not([class]) tr:hover td {
   background: var(--md-default-fg-color--lightest);
 }
+
+/* Model references read down two columns, never across a wide catalog. */
+.md-typeset details.model-family table[data-model-family] {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
+}
+.md-typeset details.model-family table[data-model-family] thead th:first-child {
+  width: 25%;
+}
+.md-typeset details.model-family table[data-model-family] th {
+  min-width: 4rem;
+}
+.md-typeset details.model-family table[data-model-family] th,
+.md-typeset details.model-family table[data-model-family] td {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .md-typeset details.model-family table[data-model-family] th,
+  .md-typeset details.model-family table[data-model-family] td {
+    padding: .6em .65em;
+  }
+}
