@@ -59,6 +59,20 @@ def test_release_notes_are_trilingual_mirrors() -> None:
         assert rendered.count(f"]({link})") == count * len(rm.LOCALES)
 
 
+@pytest.mark.parametrize("locale", rm.LOCALES)
+def test_release_model_notes_keep_current_public_api_ids(locale: str) -> None:
+    """Do not republish the old restricted-Argon or pre-Haiku-5.5 summary."""
+    from model_reference_test_helpers import family_cells
+
+    notes = rm.validate_notes_manifest()
+    guidance = next(change for change in notes["changes"] if change["id"] == "current-model-guidance")
+    page = rm.ROOT / f"stages/01-llm-basics{rm.LOCALE_SUFFIX[locale]}.md"
+    source = page.read_text(encoding="utf-8")
+    for family, model_id in (("Claude", "claude-haiku-5-5"), ("Gemini", "gemini-4-argon")):
+        assert model_id in family_cells(source, family)[1]
+        assert model_id in guidance[locale], f"{locale}: release summary omits {model_id}"
+
+
 def test_validate_version_uses_utc_date(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[object] = []
 

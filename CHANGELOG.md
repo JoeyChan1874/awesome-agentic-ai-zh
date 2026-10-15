@@ -8,6 +8,8 @@ Format: `YYYY-MM-DD · category · 1-line summary (commit-sha)`.
 
 ## 2026-10-15
 
+- **release preparation / v2026.10.15** · 三語發布摘要整理上次正式版後的模型、Memory／Skills、免費課程、兩欄模型詳表、CLI 安全、Stage 8 與授權修正。同步加入摘要與現行 API ID 的回歸檢查，避免帶回過時的模型存取說明。正式發布仍須通過完整健康掃描、三語 PDF、main／Pages SHA 與 release Environment 關卡。
+
 - **content / Stage 1 / model reference layout** · 三語將八欄模型詳表改為 18 個家族的收合選單，各用兩欄表呈現。型號各列一行，以真正的 `rowspan` 合併欄名；完整保留規格、價格條件、限制、來源與原查核日期。可見選型主線、必讀與評分資源不變，並同步更新結構與模型事實回歸測試。
 
 - **resources / courses and setup** · 三語加入 Hugging Face Context Course 與 LangChain Project: Deep Agents，分清免費教材、模型／API 費用與尚未完成開放的證書條件。13 筆課程維持展開與編輯評分，以 `3／6／2／2` 合併分類；同步更新來源、設計與測試規格，修正 NVIDIA NIM 三語官方入口。
