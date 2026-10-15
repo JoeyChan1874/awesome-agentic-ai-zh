@@ -1358,8 +1358,8 @@ pages:
         zh-Hans: {heading: "✅ 自我检查", anchor: -自我检查}
     visible_section_minimums:
       required-reading: {min_links: 5}
-      projects: {min_links: 11, min_ratings: 11}
-    resource_group_rowspans: [5, 3, 4]
+      projects: {min_links: 14, min_ratings: 14}
+    resource_group_rowspans: [7, 3, 4]
 
   - id: stage-07
     canonical: stages/07-multi-agent-production.md

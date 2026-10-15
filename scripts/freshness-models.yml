@@ -197,9 +197,20 @@ advanced_rag_fact_pack:
     raptor: 'https://github.com/parthsarthi03/raptor'
     dspy: 'https://github.com/stanfordnlp/dspy'
 
+mcp_skills_catalog_updates:
+  canonical: 'resources/mcp-skills-catalog.md'
+  entry_updates:
+    vercel_skills: '2026-10-15'
+  official_sources:
+    vercel_skills: 'https://github.com/vercel-labs/skills'
+    vercel_skills_reviewed_commit: 'https://github.com/vercel-labs/skills/tree/13e4063a1cf913f5606d57d42ab83a86f5001e04'
+
 agent_memory_fact_pack:
   canonical: 'resources/agent-memory.md'
   verified_on: '2026-08-30'
+  resource_updates:
+    hindsight: '2026-10-15'
+    openviking: '2026-10-15'
   scope: ['memory', 'privacy', 'retention', 'isolation', 'project-status']
   official_sources:
     langchain_memory: 'https://docs.langchain.com/oss/python/concepts/memory'
@@ -212,6 +223,9 @@ agent_memory_fact_pack:
     graphiti: 'https://github.com/getzep/graphiti'
     zep: 'https://github.com/getzep/zep'
     deja_vu: 'https://github.com/vshulcz/deja-vu'
+    hindsight: 'https://github.com/vectorize-io/hindsight'
+    openviking: 'https://github.com/volcengine/OpenViking'
+    openviking_license: 'https://github.com/volcengine/OpenViking/blob/main/LICENSE'
   research_sources:
     coala: 'https://arxiv.org/abs/2309.02427'
     generative_agents: 'https://arxiv.org/abs/2304.03442'
