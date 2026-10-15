@@ -8,6 +8,8 @@ Format: `YYYY-MM-DD · category · 1-line summary (commit-sha)`.
 
 ## 2026-10-15
 
+- **content / Stage 1 / scoped model refresh** · 三語更新 Argon 正式 API、Muse Wonder、Mistral Large 4 Preview 與 Jev 1.14。分清長輸出、促銷價格、開放權重與訂閱產品限制。加入 GPT Ultrafast／Decisions 選讀，保留本機練習預設。查核日期只更新這些項目，不重標整張表。
+
 - **CI / document rendering** · 將文件站的 Markdown 解析器鎖定為既有 reader-UX 清單相同的 3.11，避免兩次安裝間漂移到 3.11.1，讓中文核心詞的粗體顯示成星號。新增實際使用 MkDocs 擴充套件的三語粗體與收合選單回歸測試，並檢查文件依賴、reader-UX lock 與執行中解析器一致；未關閉顯示檢查，也未批次改寫教材。
 
 ## 2026-10-13

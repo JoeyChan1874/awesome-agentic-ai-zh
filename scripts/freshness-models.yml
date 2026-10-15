@@ -14,8 +14,12 @@ stage01_fact_pack:
   verified_on: '2026-09-22'
   provider_updates:
     gpt: '2026-10-02'
-    gemini: '2026-10-02'
+    gemini: '2026-10-15'
     anthropic: '2026-10-08'
+    typesafe_jev: '2026-10-15'
+    muse: '2026-10-15'
+    mistral: '2026-10-15'
+    gpt_features: '2026-10-15'
   scope: ['models', 'pricing', 'availability', 'deprecations', 'model-lifecycle']
   official_sources:
     openai_model_development: 'https://openai.com/policies/how-chatgpt-and-our-foundation-models-are-developed/'
@@ -31,12 +35,15 @@ stage01_fact_pack:
     gpt_sol: 'https://developers.openai.com/api/docs/models/gpt-6.1-sol'
     gpt_luna: 'https://developers.openai.com/api/docs/models/gpt-6-luna'
     gpt_pricing: 'https://developers.openai.com/api/docs/pricing'
+    gpt_ultrafast: 'https://developers.openai.com/api/docs/guides/ultrafast-mode'
+    gpt_decisions: 'https://developers.openai.com/api/docs/guides/decisions'
     typesafe_jev: 'https://docs.typesafe.ai/introduction'
     typesafe_jev_models: 'https://docs.typesafe.ai/models'
+    typesafe_jev_images: 'https://docs.typesafe.ai/images'
     typesafe_jev_launch: 'https://typesafe.ai/blog/introducing-system-one-models-and-jev'
     typesafe_jev_cloudflare: 'https://developers.cloudflare.com/ai/models/typesafe/jev/'
     gemini: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash'
-    gemini_argon: 'https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/'
+    gemini_argon: 'https://ai.google.dev/gemini-api/docs/models/gemini-4-argon'
     gemini_live: 'https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live'
     deepseek: 'https://api-docs.deepseek.com/quick_start/pricing/'
     deepseek_updates: 'https://api-docs.deepseek.com/updates/'
@@ -49,10 +56,14 @@ stage01_fact_pack:
     llama: 'https://dev.meta.ai/llama'
     muse: 'https://huggingface.co/meta-models/Muse-Glimmer-30B'
     muse_spark: 'https://dev.meta.ai/docs/models'
+    muse_wonder: 'https://dev.meta.ai/docs/models'
     grok: 'https://docs.x.ai/developers/models/grok-4.7'
     mimo: 'https://mimo.mi.com/models/en-US/mimo-v2.6-pro'
     gemma: 'https://ai.google.dev/gemma/docs/core'
     mistral: 'https://docs.mistral.ai/models'
+    mistral_large4: 'https://docs.mistral.ai/models/mistral-large-4-0'
+    mistral_medium35: 'https://docs.mistral.ai/models/mistral-medium-3-5-26-04'
+    mistral_releases: 'https://docs.mistral.ai/resources/changelogs'
     phi: 'https://azure.microsoft.com/en-us/products/phi'
   pricing_sources:
     claude: 'https://platform.claude.com/docs/en/about-claude/pricing'
@@ -66,6 +77,7 @@ stage01_fact_pack:
     glm: 'https://docs.z.ai/guides/overview/pricing'
     deepseek: 'https://api-docs.deepseek.com/quick_start/pricing/'
     muse_spark: 'https://dev.meta.ai/docs/pricing-rate-limits'
+    mistral_large4: 'https://docs.mistral.ai/models/mistral-large-4-0'
     grok: 'https://docs.x.ai/developers/pricing'
     mimo: 'https://mimo.mi.com/models/en-US/mimo-v2.6-pro'
   migration_sources:
@@ -531,6 +543,7 @@ current_frontier_models:
     - "GPT-5.6 Sol / Terra / Luna (previous generation; not Stage 01 defaults)"
   typesafe_ai:
     - "Jev 1.13 / jev-1.13.0 (official model; service in early access)"
+    - "Jev 1.14 / jev-1.14.0 (Preview; jev-preview, not jev-latest)"
   google_gemini:
     - "Gemini 3.8 Flash"
     - "Gemini 3.1 Pro Preview"
@@ -561,6 +574,8 @@ current_frontier_models:
   google_gemma:
     - "Gemma 4"
   mistral:
+    - "Mistral Large 4 (Public Preview API; weights forthcoming)"
+    - "Mistral Medium 3.5 (Modified MIT)"
     - "Mistral Small 4"
     - "Mistral Large 3"
     - "Ministral 3"
