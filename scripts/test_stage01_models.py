@@ -76,7 +76,9 @@ def test_stage01_fact_pack_separates_full_table_and_gpt_update_dates() -> None:
     fact_pack = (ROOT / "scripts" / "freshness-models.yml").read_text(encoding="utf-8")
     assert "verified_on: '2026-09-22'" in fact_pack
     assert "gpt: '2026-10-02'" in fact_pack
-    assert "gemini: '2026-10-02'" in fact_pack
+    assert "gemini: '2026-10-15'" in fact_pack
+    for provider in ("typesafe_jev", "muse", "mistral", "gpt_features"):
+        assert f"{provider}: '2026-10-15'" in fact_pack
     assert "anthropic: '2026-10-08'" in fact_pack
     assert "claude_sonnet: 'https://platform.claude.com/docs/en/models/sonnet-5-5/overview'" in fact_pack
     assert "gpt: 'https://developers.openai.com/api/docs/pricing'" in fact_pack
@@ -188,38 +190,60 @@ def test_stage01_gpt61_has_exact_id_and_responses_tool_boundary(page: Path) -> N
 
 
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
-def test_stage01_argon_is_restricted_and_not_a_guessed_api_default(page: Path) -> None:
+def test_stage01_argon_is_available_with_scoped_context_and_pricing(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
     row = next(line for line in text.splitlines() if line.startswith("| Gemini |"))
     cells = [cell.strip() for cell in row.strip("|").split("|")]
     assert "Gemini 3.8 Flash" in cells[1] and "Gemini 4 Argon" in cells[1]
-    restricted, output_limit, no_context, forthcoming, no_id = {
-        "01-llm-basics.md": (
-            "Argon：限 Fairwind 可信資安防禦者", "Argon：公告 1M 輸出上限",
-            "公開 API context 規格未公布", "一般 API／Google AI Ultra 開放仍待後續發布",
-            "公開 API model ID 未公布",
-        ),
-        "01-llm-basics.en.md": (
-            "Argon: trusted cyber defenders through Fairwind only", "Argon: announced 1M output limit",
-            "public API context specification not announced", "API / Google AI Ultra access is still forthcoming",
-            "no public API model ID has been announced",
-        ),
-        "01-llm-basics.zh-Hans.md": (
-            "Argon：限 Fairwind 可信网络安全防御者", "Argon：公告 1M 输出上限",
-            "公开 API context 规格未公布", "一般 API／Google AI Ultra 开放仍待后续发布",
-            "公开 API model ID 未公布",
-        ),
-    }[page.name]
-    assert any(label in cells[1] for label in ("發布參考", "发布参考", "release reference"))
-    assert restricted in cells[2]
-    assert output_limit in cells[3] and no_context in cells[3]
-    assert forthcoming in cells[6] and no_id in cells[6]
-    assert "$2/$10" in cells[4] and "$4/$20" in cells[4]
-    assert "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-argon/" in cells[7]
-    assert not re.search(r"`gemini-4[^`]*`", row)
+    assert "`gemini-4-argon`" in cells[1]
+    assert "Fairwind" not in row
+    assert any(label in cells[2] for label in ("正式可用", "generally available"))
+    assert "1,048,576" in cells[3] and "65,536" in cells[3]
+    assert "long decode" in cells[6] and "1M" in cells[6]
+    assert "2026-11-30" in cells[4] and "2026-12-01" in cells[4]
+    assert "$2/$0.10/$10" in cells[4] and "$4/$0.20/$20" in cells[4]
+    assert any(label in cells[6] for label in ("無免費層", "无免费层", "no free tier"))
+    assert "https://ai.google.dev/gemini-api/docs/models/gemini-4-argon" in cells[7]
     visible_selector = text.split("<details", maxsplit=1)[0]
     assert "Gemini 3.8 Flash" in visible_selector
     assert "Gemini 4 Argon" not in visible_selector
+
+
+@pytest.mark.parametrize("page", [item[0] for item in PAGES])
+def test_october_preview_and_product_boundaries(page: Path) -> None:
+    text = page.read_text(encoding="utf-8")
+    rows = {
+        line.split("|", 2)[1].strip(): [cell.strip() for cell in line.strip("|").split("|")]
+        for line in text.splitlines() if line.startswith("|")
+    }
+    jev = next(cells for key, cells in rows.items() if key.startswith("Jev"))
+    assert "jev-1.14.0" in jev[1] and "jev-preview" in jev[1]
+    assert "jev-1.13.0" in jev[1] and "jev-latest" in jev[1]
+    assert "Preview" in jev[2]
+    assert "262K" not in jev[3] and "262K" in jev[6]
+    assert "experimental" in jev[6]
+    assert "muse-wonder-1.0" in rows["Muse"][1]
+    assert "US$4/$0.20/$20" in rows["Muse"][4]
+    assert "Wonder Full" in rows["Muse"][6] and "Muse Code" in rows["Muse"][6]
+    mistral = rows["Mistral"]
+    assert "mistral-large-4" in mistral[1] and "Public Preview" in mistral[2]
+    assert "US$0.68/$0.07/$2.09" in mistral[4]
+    assert "US$1.36/$0.14/$4.18" in mistral[4]
+    assert "Modified MIT" in mistral[4]
+    assert any(token in mistral[6] for token in ("權重尚未釋出", "权重尚未发布", "weights not yet released"))
+    assert "https://developers.openai.com/api/docs/guides/ultrafast-mode" in text
+    assert "https://developers.openai.com/api/docs/guides/decisions" in text
+    assert "public beta" in text and "gpt-6-luna" in text
+
+
+def test_october_model_rows_keep_identical_urls_and_numbers_across_locales() -> None:
+    for family in ("Jev", "Gemini", "Muse", "Mistral"):
+        signatures = []
+        for page, *_ in PAGES:
+            row = next(line for line in page.read_text(encoding="utf-8").splitlines()
+                       if line.startswith(f"| {family}"))
+            signatures.append((re.findall(r"https://[^)]+", row), sorted(re.findall(r"\d+(?:[.,]\d+)*", row))))
+        assert signatures[0] == signatures[1] == signatures[2], family
 
 
 @pytest.mark.parametrize("page", [item[0] for item in PAGES if item[0].suffix == ".md" and ".en." not in item[0].name])
