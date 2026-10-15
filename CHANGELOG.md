@@ -8,6 +8,8 @@ Format: `YYYY-MM-DD · category · 1-line summary (commit-sha)`.
 
 ## 2026-10-15
 
+- **content / Stage 1 / model reference layout** · 三語將八欄模型詳表改為 18 個家族的收合選單，各用兩欄表呈現。型號各列一行，以真正的 `rowspan` 合併欄名；完整保留規格、價格條件、限制、來源與原查核日期。可見選型主線、必讀與評分資源不變，並同步更新結構與模型事實回歸測試。
+
 - **resources / courses and setup** · 三語加入 Hugging Face Context Course 與 LangChain Project: Deep Agents，分清免費教材、模型／API 費用與尚未完成開放的證書條件。13 筆課程維持展開與編輯評分，以 `3／6／2／2` 合併分類；同步更新來源、設計與測試規格，修正 NVIDIA NIM 三語官方入口。
 
 - **resources / Memory and Skills** · 三語加入 Hindsight、OpenViking 與 Vercel Skills，保留可見選擇入口與編輯星等。說清記憶測試、授權、安裝信任與匿名使用紀錄限制；Memory 的 14 筆資源依 `7／3／4` 合併分類。只記錄這三項的查核日期，並同步更新來源包、閱讀驗證與回歸測試。

@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
+
+from model_reference_test_helpers import FIELDS, ModelReferenceParser, family_cells, family_rows
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,8 +22,7 @@ def test_stage01_uses_current_fable_and_mythos_models(
     page: Path, fable_status: str, mythos_status: str
 ) -> None:
     text = page.read_text(encoding="utf-8")
-    row = next(line for line in text.splitlines() if line.startswith("| Claude |"))
-    cells = [cell.strip() for cell in row.strip("|").split("|")]
+    cells = family_cells(text, "Claude")
 
     assert len(cells) == 8
     assert "Fable 5.1" in cells[1]
@@ -50,8 +52,7 @@ def test_stage01_uses_current_fable_and_mythos_models(
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_uses_current_gpt_family(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    row = next(line for line in text.splitlines() if line.startswith("| GPT |"))
-    cells = [cell.strip() for cell in row.strip("|").split("|")]
+    cells = family_cells(text, "GPT")
 
     assert len(cells) == 8
     for model in ("gpt-6-astra", "gpt-6.1-sol", "gpt-6-luna"):
@@ -87,8 +88,7 @@ def test_stage01_fact_pack_separates_full_table_and_gpt_update_dates() -> None:
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_explains_typesafe_jev_without_treating_it_as_a_chat_llm(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    row = next(line for line in text.splitlines() if line.startswith("| Jev (TypeSafe AI) |") or line.startswith("| Jev（TypeSafe AI） |"))
-    cells = [cell.strip() for cell in row.strip("|").split("|")]
+    cells = family_cells(text, "Jev")
 
     assert len(cells) == 8
     assert "early access" in cells[2].lower()
@@ -113,15 +113,11 @@ def test_stage01_explains_typesafe_jev_without_treating_it_as_a_chat_llm(page: P
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_current_model_table_corrections(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    rows = {
-        line.split("|", 2)[1].strip(): line
-        for line in text.splitlines()
-        if line.startswith("|")
-    }
+    rows = family_rows(text)
 
-    assert "Gemini 3.8 Flash" in rows["Gemini"]
-    assert "Gemini 3.7 Flash" not in rows["Gemini"]
-    deepseek = [cell.strip() for cell in rows["DeepSeek"].strip("|").split("|")]
+    assert "Gemini 3.8 Flash" in rows["Gemini"][1]
+    assert "Gemini 3.7 Flash" not in rows["Gemini"][1]
+    deepseek = rows["DeepSeek"]
     assert deepseek[3] in {
         "1M context／384K 最大輸出",
         "1M context／384K 最大输出",
@@ -133,12 +129,12 @@ def test_stage01_current_model_table_corrections(page: Path) -> None:
     assert "$1.32/$0.66" in deepseek[4]
     assert "$3.96/$1.98" in deepseek[4]
 
-    hunyuan = [cell.strip() for cell in rows["Hunyuan"].strip("|").split("|")]
+    hunyuan = rows["Hunyuan"]
     assert hunyuan[3] == "256K"
     assert "2026-08-31" in hunyuan[6]
     assert "https://cloud.tencent.com/document/product/1823/130051" in hunyuan[7]
 
-    minimax = [cell.strip() for cell in rows["MiniMax"].strip("|").split("|")]
+    minimax = rows["MiniMax"]
     assert "permanent 50% off" not in minimax[4]
     assert "永久 50% 折扣" not in minimax[4]
     assert "$0.30/$0.06/$1.20" in minimax[4]
@@ -150,10 +146,7 @@ def test_stage01_current_model_table_corrections(page: Path) -> None:
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_has_eighteen_sourced_families_and_distinguishes_muse_products(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    rows = {
-        line.split("|", 2)[1].strip(): [cell.strip() for cell in line.strip("|").split("|")]
-        for line in text.splitlines() if line.startswith("|")
-    }
+    rows = family_rows(text)
     families = {"Claude", "GPT", "Jev（TypeSafe AI）", "Jev (TypeSafe AI)", "Gemini", "DeepSeek", "Kimi", "Hunyuan", "MiniMax", "Qwen", "GLM", "Yi", "Llama", "Muse", "Grok", "MiMo", "Gemma", "Mistral", "Phi"}
     assert len(set(rows) & families) == 18
     assert "muse-spark-1.3" in rows["Muse"][1]
@@ -168,15 +161,13 @@ def test_stage01_has_eighteen_sourced_families_and_distinguishes_muse_products(p
     assert "US$0.435/$0.0036/$0.87" in rows["MiMo"][4]
     assert "https://mimo.mi.com/models/en-US/mimo-v2.6-pro" in rows["MiMo"][7]
     assert "https://ai.google.dev/gemini-api/docs/models/gemini-3.8-live" in text
-    table_region = text[text.index("| Claude |"):text.index("\n", text.index("| Phi |"))]
-    assert all(line.startswith("|") for line in table_region.splitlines())
+    assert all(len(cells) == 8 and all(cells) for cells in rows.values())
 
 
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_gpt61_has_exact_id_and_responses_tool_boundary(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    row = next(line for line in text.splitlines() if line.startswith("| GPT |"))
-    cells = [cell.strip() for cell in row.strip("|").split("|")]
+    cells = family_cells(text, "GPT")
     assert "gpt-6.1-sol" in cells[1]
     assert "`gpt-6-sol`" not in cells[1]
     required_boundary = {
@@ -185,18 +176,17 @@ def test_stage01_gpt61_has_exact_id_and_responses_tool_boundary(page: Path) -> N
         "01-llm-basics.zh-Hans.md": ("工具调用须用 Responses API", "Chat Completions 不支持工具调用"),
     }[page.name]
     assert all(token in cells[6] for token in required_boundary)
-    assert "Sora" not in row
+    assert "Sora" not in " ".join(cells)
     assert "https://developers.openai.com/api/docs/models/gpt-6.1-sol" in cells[7]
 
 
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_stage01_argon_is_available_with_scoped_context_and_pricing(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    row = next(line for line in text.splitlines() if line.startswith("| Gemini |"))
-    cells = [cell.strip() for cell in row.strip("|").split("|")]
+    cells = family_cells(text, "Gemini")
     assert "Gemini 3.8 Flash" in cells[1] and "Gemini 4 Argon" in cells[1]
     assert "`gemini-4-argon`" in cells[1]
-    assert "Fairwind" not in row
+    assert "Fairwind" not in " ".join(cells)
     assert any(label in cells[2] for label in ("正式可用", "generally available"))
     assert "1,048,576" in cells[3] and "65,536" in cells[3]
     assert "long decode" in cells[6] and "1M" in cells[6]
@@ -212,10 +202,7 @@ def test_stage01_argon_is_available_with_scoped_context_and_pricing(page: Path) 
 @pytest.mark.parametrize("page", [item[0] for item in PAGES])
 def test_october_preview_and_product_boundaries(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
-    rows = {
-        line.split("|", 2)[1].strip(): [cell.strip() for cell in line.strip("|").split("|")]
-        for line in text.splitlines() if line.startswith("|")
-    }
+    rows = family_rows(text)
     jev = next(cells for key, cells in rows.items() if key.startswith("Jev"))
     assert "jev-1.14.0" in jev[1] and "jev-preview" in jev[1]
     assert "jev-1.13.0" in jev[1] and "jev-latest" in jev[1]
@@ -240,9 +227,8 @@ def test_october_model_rows_keep_identical_urls_and_numbers_across_locales() -> 
     for family in ("Jev", "Gemini", "Muse", "Mistral"):
         signatures = []
         for page, *_ in PAGES:
-            row = next(line for line in page.read_text(encoding="utf-8").splitlines()
-                       if line.startswith(f"| {family}"))
-            signatures.append((re.findall(r"https://[^)]+", row), sorted(re.findall(r"\d+(?:[.,]\d+)*", row))))
+            row = " ".join(family_cells(page.read_text(encoding="utf-8"), family))
+            signatures.append((re.findall(r"https://\S+", row), sorted(re.findall(r"\d+(?:[.,]\d+)*", row))))
         assert signatures[0] == signatures[1] == signatures[2], family
 
 
@@ -250,10 +236,9 @@ def test_october_model_rows_keep_identical_urls_and_numbers_across_locales() -> 
 def test_refreshed_model_row_sentences_fit_written_chinese_style(page: Path) -> None:
     text = page.read_text(encoding="utf-8")
     for family in ("GPT", "Gemini"):
-        row = next(line for line in text.splitlines() if line.startswith(f"| {family} |"))
         # Exclude model-name lists and official-link lists. For descriptive,
         # specification, and pricing cells count rendered text, not link URLs.
-        for cell in row.strip("|").split("|")[2:7]:
+        for cell in family_cells(text, family)[2:7]:
             visible = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", cell)
             visible = visible.replace("**", "").replace("`", "")
             for sentence in re.split(r"(?<=[。！？])", visible):
@@ -279,3 +264,55 @@ def test_current_model_refresh_changelog_sentences_fit_written_style() -> None:
     for sentence in re.split(r"(?<=[。！？])", prose):
         if sentence.strip():
             assert len(sentence.strip()) <= 60, sentence
+
+
+@pytest.mark.parametrize("page", [item[0] for item in PAGES])
+def test_model_reference_uses_closed_family_disclosures_and_two_columns(page: Path) -> None:
+    text = page.read_text(encoding="utf-8")
+    blocks = re.findall(
+        r'<details class="model-family" markdown="1">\s*<summary>(.*?)</summary>\s*'
+        r'(<table data-model-family=".*?</table>)\s*</details>', text, re.S,
+    )
+    assert len(blocks) == 18
+    assert len(re.findall(r'<details\b[^>]*class="model-family"[^>]*>', text)) == 18
+    for family, markup in blocks:
+        table = ElementTree.fromstring(markup)
+        assert table.attrib["data-model-family"] == family
+        assert len(table.findall("./thead/tr/th")) == 2
+        groups = table.findall("tbody")
+        assert [group.attrib["data-field"] for group in groups] == list(FIELDS)
+        models = groups[0].findall("tr")
+        label = models[0].find("th")
+        assert int(label.attrib.get("rowspan", "1")) == len(models)
+        assert label.attrib["scope"] == ("rowgroup" if len(models) > 1 else "row")
+        assert len(models[0]) == 2
+        assert all(len(row) == 1 and row.find("td") is not None for row in models[1:])
+        for group in groups[1:]:
+            assert len(group) == 1 and len(group[0]) == 2
+            assert group[0].find("th").attrib["scope"] == "row"
+        assert all("".join(cell.itertext()).strip() for cell in table.iter("td"))
+        assert not re.search(r"\[[^\]]+\]\(|`|\*\*", markup)
+        assert all(link.attrib.get("href", "").startswith("https://") for link in table.iter("a"))
+        if family == "Claude":
+            assert len(models) == 5
+            assert len(table.findall(".//code")) == 5
+
+
+def test_all_model_reference_links_and_variant_ids_match_across_locales() -> None:
+    signatures = []
+    for page, *_ in PAGES:
+        parser = ModelReferenceParser()
+        parser.feed(page.read_text(encoding="utf-8"))
+        signatures.append([
+            (re.findall(r"`([^`]+)`", "; ".join(fields["models"])), parser.links[family])
+            for family, fields in parser.records.items()
+        ])
+    assert signatures[0] == signatures[1] == signatures[2]
+
+
+def test_reference_parser_rejects_missing_fields_and_duplicate_families() -> None:
+    table = '<table data-model-family="Claude"><tbody data-field="models"><tr><td>Fable</td></tr></tbody></table>'
+    with pytest.raises(AssertionError, match="missing or reordered fields"):
+        family_rows(table)
+    with pytest.raises(AssertionError, match="duplicate family table"):
+        family_rows(table + table)

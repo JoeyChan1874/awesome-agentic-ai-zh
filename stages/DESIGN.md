@@ -171,6 +171,8 @@ stage 的價值 = 讀者學完後**能回答這個問題**。
 
 多數 stage 保留以下 section；**呈現順序採漸進式揭露**。Stage 1 是第一個完成遷移的 pilot，其他 stage 在各自內容更新時逐章遷移，不要求在同一個 PR 一次重寫：
 
+Stage 1 的完整模型規格是查詢資料，不是初學者的必讀清單。保留外層收合入口，再依 18 個家族分成預設關閉的選單。每家使用「欄位／內容」兩欄表，型號各佔一列，共用欄名以真正的 `rowspan` 合併；狀態、context、價格、用途、限制與官方來源各留一個寬列。原本共用的規格不得臆測成個別型號的數字。不能再把多個型號、價格和限制塞進八欄窄表；可見的選模型主線、必讀與評分資源維持原位。
+
 Stage 1 的模型生命週期固定保持可見：`資料 → Pre-training → Base Model → Post-training → Instruct Model → Inference → Agent 系統`。正文先粗體白話解釋 **Pre-training**、**Post-training**、**Fine-tuning** 與 **Inference**，再用三語同構亮色圖整理關係。圖與正文都要明說 Agent 是包住模型使用流程的系統，不是第七個模型 checkpoint；Prompt、RAG、Memory、Tools 與 Harness 通常不改模型權重。SFT、DPO 與 RLHF／RL 留在 Stage 1 可見主線；GRPO、PEFT／LoRA、Distillation 與 Quantization 由三語 `resources/model-training-guide*` 提供可見選修導覽。選修頁的名詞、必修閱讀、完整五星資源與完成檢查直接可見，只有實作前安全清單預設收合。Stage 6 提到 Fine-tuning 時必須連回同語言指南，避免把它誤當成 RAG 或保存最新資料的方法。
 
 Stage 2 的固定主線是「目標／資料／規則／輸出 → Zero-Shot／One-Shot／Few-Shot → Chain-of-Thought 的正確邊界 → 六筆固定案例 → 一次只改一件事 → 比較分數」。三語概念圖固定放在可見核心詞之後：先由正文定義，再用同構圖整理關係；圖片不能取代定義，也不能畫入正文已撤掉的固定數字。必修閱讀與 18 筆五星資源表保持可見；程式碼、模型比較與安全補充預設收合。CoT 必須先用白話解釋，但不當成要求模型公開完整內部推理的通用步驟。
