@@ -397,9 +397,14 @@ agent_paradigms_fact_pack:
 courses_fact_pack:
   canonical: 'resources/courses.md'
   verified_on: '2026-08-29'
+  course_updates:
+    hugging_face_context: '2026-10-15'
+    langchain_deep_agents: '2026-10-15'
   scope: ['course-availability', 'cost', 'certificate', 'assessment', 'repository-status']
   official_sources:
     hugging_face_agents: 'https://huggingface.co/learn/agents-course'
+    hugging_face_context: 'https://huggingface.co/learn/context-course/unit0/introduction'
+    langchain_deep_agents: 'https://academy.langchain.com/courses/deep-agents-with-langgraph'
     microsoft_agents_for_beginners: 'https://github.com/microsoft/ai-agents-for-beginners'
     deeplearning_ai_agentic_ai: 'https://www.deeplearning.ai/courses/agentic-ai/'
     # W&B Agents temporarily removed 2026-10-02: old URL returned 404; replacement could not be opened.
@@ -459,6 +464,8 @@ model_training_fact_pack:
 setup_guide_fact_pack:
   canonical: 'resources/setup-guide.md'
   verified_on: '2026-08-31'
+  provider_entrypoint_updates:
+    nvidia_nim_llm_api: '2026-10-15'
   scope: ['install-paths', 'api-keys', 'authentication', 'provider-entrypoints', 'project-status']
   official_sources:
     claude_api_quickstart: 'https://platform.claude.com/docs/en/get-started'
@@ -470,7 +477,7 @@ setup_guide_fact_pack:
     uv_python_policy: 'https://docs.astral.sh/uv/reference/policies/python/'
     openai_quickstart: 'https://platform.openai.com/docs/quickstart'
     gemini_openai_compatibility: 'https://ai.google.dev/gemini-api/docs/openai'
-    nvidia_nim_llm_api: 'https://docs.api.nvidia.com/nim/re/reference/llm-apis'
+    nvidia_nim_llm_api: 'https://docs.api.nvidia.com/nim/reference/llm-apis'
     deepseek_api: 'https://api-docs.deepseek.com/'
     kimi_api: 'https://platform.kimi.com/docs/api/overview'
     alibaba_model_studio: 'https://help.aliyun.com/en/model-studio/base-url'
