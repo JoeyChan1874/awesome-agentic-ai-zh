@@ -6,7 +6,13 @@ Format: `YYYY-MM-DD · category · 1-line summary (commit-sha)`.
 
 ---
 
+## 2026-10-16
+
+- **release / optional PDFs / v2026.10.16** · 依維護者決定，Release 預設只發布繁中、簡中與英文版本說明；新增預設關閉的 `include_pdf`，只在需要時建置、驗證並上傳完整三語 PDF。正文、健康掃描、人工批准與 SHA 鎖定仍是必要關卡。本版不附 PDF，也不把先前取消的候選版算成正式發布。
+
 ## 2026-10-15
+
+- **release / PDF rendering** · 發布前抽查攔下繁中／簡中 PDF 的粗體星號殘留。改用能辨識中文相鄰粗體的 Pandoc reader，保留表格、任務清單與程式碼；轉檔時直接阻擋正文未解析的粗體，並在安裝實際 Pandoc 後重跑三語回歸測試。不改寫教材正文，也不發布有問題的候選附件。
 
 - **release preparation / v2026.10.15** · 三語發布摘要整理上次正式版後的模型、Memory／Skills、免費課程、兩欄模型詳表、CLI 安全、Stage 8 與授權修正。同步加入摘要與現行 API ID 的回歸檢查，避免帶回過時的模型存取說明。正式發布仍須通過完整健康掃描、三語 PDF、main／Pages SHA 與 release Environment 關卡。
 

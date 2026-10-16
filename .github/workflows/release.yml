@@ -7,6 +7,11 @@ on:
         description: Calendar tag, for example v2026.08.31 or v2026.08.31-2
         required: true
         type: string
+      include_pdf:
+        description: Also build and attach all three offline PDFs (optional)
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -17,7 +22,7 @@ concurrency:
 
 jobs:
   prepare:
-    name: Build and verify three release candidates
+    name: Verify trilingual release candidate
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     permissions:
@@ -138,13 +143,19 @@ jobs:
           exit "$summary_code"
 
       - name: Install PDF build dependencies
+        if: ${{ inputs.include_pdf }}
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             pandoc weasyprint poppler-utils \
             fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji
 
+      - name: Test the installed PDF reader with all three locales
+        if: ${{ inputs.include_pdf }}
+        run: python -m pytest scripts/test_release_manifest.py -q
+
       - name: Build all three PDFs from the same page order
+        if: ${{ inputs.include_pdf }}
         env:
           RELEASE_VERSION: ${{ steps.lock.outputs.version }}
         run: |
@@ -153,6 +164,7 @@ jobs:
           done
 
       - name: Verify PDF text, coverage, and filenames
+        if: ${{ inputs.include_pdf }}
         env:
           RELEASE_VERSION: ${{ steps.lock.outputs.version }}
         run: |
@@ -203,6 +215,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: release
+    env:
+      INCLUDE_PDF: ${{ inputs.include_pdf }}
     permissions:
       contents: write
     steps:
@@ -227,7 +241,7 @@ jobs:
           name: release-candidate-${{ needs.prepare.outputs.version }}
           path: candidate
 
-      - name: Recheck main and the three assets before writing
+      - name: Recheck main and requested assets before writing
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -243,10 +257,12 @@ jobs:
           fi
           python scripts/release_manifest.py validate --strict-urls --version "$RELEASE_VERSION"
           python scripts/release_manifest.py validate-version --version "$RELEASE_VERSION"
-          for locale in zh-TW zh-Hans en; do
-            name="$(python scripts/release_manifest.py asset-name --version "$RELEASE_VERSION" --locale "$locale")"
-            test -s "candidate/dist/$name"
-          done
+          if [ "$INCLUDE_PDF" = true ]; then
+            for locale in zh-TW zh-Hans en; do
+              name="$(python scripts/release_manifest.py asset-name --version "$RELEASE_VERSION" --locale "$locale")"
+              test -s "candidate/dist/$name"
+            done
+          fi
           test -s candidate/release-body.md
 
       - name: Create or refresh a Draft Release
@@ -268,7 +284,9 @@ jobs:
               --draft --target "$LOCKED_SHA" --title "$title" \
               --notes-file candidate/release-body.md
           fi
-          gh release upload "$RELEASE_VERSION" --repo "$REPOSITORY" --clobber candidate/dist/*.pdf
+          if [ "$INCLUDE_PDF" = true ]; then
+            gh release upload "$RELEASE_VERSION" --repo "$REPOSITORY" --clobber candidate/dist/*.pdf
+          fi
 
       - name: Verify the Draft Release before publishing
         env:
@@ -285,11 +303,14 @@ jobs:
           jq -r '.body' /tmp/release.json | grep -Fx '## 繁體中文'
           jq -r '.body' /tmp/release.json | grep -Fx '## 简体中文'
           jq -r '.body' /tmp/release.json | grep -Fx '## English'
-          printf '%s\n' \
-            "awesome-agentic-ai-zh-$RELEASE_VERSION-en.pdf" \
-            "awesome-agentic-ai-zh-$RELEASE_VERSION-zh-Hans.pdf" \
-            "awesome-agentic-ai-zh-$RELEASE_VERSION-zh-TW.pdf" \
-            > /tmp/expected-assets.txt
+          : > /tmp/expected-assets.txt
+          if [ "$INCLUDE_PDF" = true ]; then
+            printf '%s\n' \
+              "awesome-agentic-ai-zh-$RELEASE_VERSION-en.pdf" \
+              "awesome-agentic-ai-zh-$RELEASE_VERSION-zh-Hans.pdf" \
+              "awesome-agentic-ai-zh-$RELEASE_VERSION-zh-TW.pdf" \
+              > /tmp/expected-assets.txt
+          fi
           jq -r '.assets[].name' /tmp/release.json | sort > /tmp/actual-assets.txt
           diff -u /tmp/expected-assets.txt /tmp/actual-assets.txt
 

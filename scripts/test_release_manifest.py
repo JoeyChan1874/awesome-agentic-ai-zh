@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import shutil
+import subprocess
 from collections import Counter
 from datetime import date, datetime
 from pathlib import Path
@@ -108,6 +110,44 @@ def test_asset_names_are_exact_and_locale_specific() -> None:
     assert rm.asset_name("v2026.08.31", "zh-TW") == "awesome-agentic-ai-zh-v2026.08.31-zh-TW.pdf"
     assert rm.asset_name("v2026.08.31-2", "zh-Hans") == "awesome-agentic-ai-zh-v2026.08.31-2-zh-Hans.pdf"
     assert rm.asset_name("v2026.08.31", "en") == "awesome-agentic-ai-zh-v2026.08.31-en.pdf"
+
+
+@pytest.mark.parametrize("term", ["**快取（cache）**像便條", "**缓存（cache）**像便条", "**Cache** is a note"])
+def test_pdf_html_rejects_visible_unparsed_emphasis(term: str) -> None:
+    with pytest.raises(rm.ReleaseManifestError, match="unparsed Markdown emphasis"):
+        rm.prepare_pdf_html(f"<html><body><p>{term}</p></body></html>")
+
+
+def test_pdf_html_preserves_literal_emphasis_in_code_and_styles() -> None:
+    source = '<style>/* **literal** */</style><pre><code>**example**</code></pre><p><code>**inline**</code></p>'
+    assert rm.prepare_pdf_html(source) == source
+
+
+@pytest.mark.parametrize("term", ["快取（cache）", "缓存（cache）", "Cache"])
+def test_pdf_reader_renders_core_terms_without_rewriting_code(term: str) -> None:
+    pandoc = shutil.which("pandoc")
+    if pandoc is None:
+        pytest.skip("Pandoc runtime required; production prepare-html gate also checks visible emphasis")
+    script = (rm.ROOT / "scripts/build-pdf.sh").read_text(encoding="utf-8")
+    reader = re.search(r"--from=([^\s\\]+)", script)
+    assert reader is not None
+    source = (f'**{term}**像便條。\n\n`**literal**`\n\n```python\npattern = "**literal**"\n```\n'
+              '\n<a id="legacy"></a>\n## Resources\n\n| Kind | URL |\n|---|---|\n'
+              '| Official | https://example.com/ |\n\n- [ ] Task\n\n~~old~~\n'
+              '\n<table><tr><th rowspan="2">Shared</th><td>First</td></tr>'
+              '<tr><td>Second</td></tr></table>\n')
+    result = subprocess.run([pandoc, "--from=" + reader.group(1), "--to=html5"],
+                            input=source, text=True, encoding="utf-8", capture_output=True, check=True)
+    assert f"<strong>{term}</strong>" in result.stdout
+    assert '<code>**literal**</code>' in result.stdout
+    assert '&quot;**literal**&quot;' in result.stdout
+    assert '<h2 id="resources">Resources</h2>' in result.stdout
+    assert result.stdout.count('<table>') == 2
+    assert 'rowspan="2"' in result.stdout
+    assert '<a href="https://example.com/"' in result.stdout
+    assert '<del>old</del>' in result.stdout
+    assert 'type="checkbox"' in result.stdout
+    assert rm.prepare_pdf_html(result.stdout) == result.stdout
 
 
 def test_pdf_table_text_keeps_whole_words() -> None:

@@ -29,6 +29,41 @@ def test_only_environment_guarded_publish_job_can_write() -> None:
     assert jobs["publish"]["needs"] == "prepare"
 
 
+def test_pdf_is_an_explicit_opt_in_not_a_release_requirement() -> None:
+    workflow = load_workflow()
+    setting = workflow["on"]["workflow_dispatch"]["inputs"]["include_pdf"]
+    assert setting["type"] == "boolean"
+    assert setting["default"] == "false"
+    pdf_steps = [step for step in workflow["jobs"]["prepare"]["steps"]
+                 if step["name"] in {
+                     "Install PDF build dependencies",
+                     "Test the installed PDF reader with all three locales",
+                     "Build all three PDFs from the same page order",
+                     "Verify PDF text, coverage, and filenames",
+                 }]
+    assert len(pdf_steps) == 4
+    assert all(step["if"] == "${{ inputs.include_pdf }}" for step in pdf_steps)
+    for name in ("Run blocking repository gates", "Run the full release content-health scan",
+                 "Render one trilingual Release body"):
+        step = next(step for step in workflow["jobs"]["prepare"]["steps"] if step["name"] == name)
+        assert "if" not in step
+
+
+def test_optional_asset_guards_cover_check_upload_and_exact_draft_inventory() -> None:
+    publish = load_workflow()["jobs"]["publish"]
+    assert publish["env"]["INCLUDE_PDF"] == "${{ inputs.include_pdf }}"
+    steps = {step["name"]: step for step in publish["steps"]}
+    check = steps["Recheck main and requested assets before writing"]["run"]
+    assert 'if [ "$INCLUDE_PDF" = true ]; then' in check
+    assert check.index('if [ "$INCLUDE_PDF" = true ]; then') < check.index('for locale in zh-TW zh-Hans en')
+    upload = steps["Create or refresh a Draft Release"]["run"]
+    assert upload.index('if [ "$INCLUDE_PDF" = true ]; then') < upload.index('gh release upload')
+    verify = steps["Verify the Draft Release before publishing"]["run"]
+    assert ': > /tmp/expected-assets.txt' in verify
+    assert 'if [ "$INCLUDE_PDF" = true ]; then' in verify
+    assert 'diff -u /tmp/expected-assets.txt /tmp/actual-assets.txt' in verify
+
+
 def test_prepare_locks_main_and_builds_all_locales() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     assert text.count("runs-on: ubuntu-24.04") == 2
