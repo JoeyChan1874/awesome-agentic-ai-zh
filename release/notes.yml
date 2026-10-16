@@ -1,9 +1,16 @@
 schema_version: 1
-release_version: v2026.10.15
+release_version: v2026.10.16
 
 # One ordered list produces all three language sections.
 # Only landed changes belong here; pending project proposals are excluded.
 changes:
+  - id: optional-offline-pdfs
+    category: maintenance
+    zh-TW: Release 預設只發布三語版本說明，不再要求每次產出 PDF。本版不附 PDF；需要離線教材時，才選擇一次產出完整三語附件。保留選用轉檔的中文粗體修正、表格與程式碼回歸檢查。
+    zh-Hans: Release 默认只发布三语版本说明，不再要求每次生成 PDF。本版不附 PDF；需要离线教材时，才选择一次生成完整三语附件。保留可选转换的中文粗体修正、表格与代码回归检查。
+    en: Releases now default to trilingual notes without PDFs. This release has no PDF attachments; offline editions are an explicit all-three-language opt-in. Optional conversion retains the CJK bold fix and table/code regression checks.
+    links:
+      - https://github.com/WenyuChiou/awesome-agentic-ai-zh/actions
   - id: current-model-guidance
     category: learning-content
     zh-TW: Stage 1 更新 Haiku 5.5（claude-haiku-5-5）的 API、分級價格與 Sonnet 快取價格。Gemini 4 Argon（gemini-4-argon）改列正式 API，並更新 Muse、Mistral 與 Jev 的狀態和限制。Ollama 起點不變；舊範例保留明示的相容界線。
